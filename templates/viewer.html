@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>PDF 뷰어</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/viewer.css') }}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.13.216/pdf.min.js"></script>
+</head>
+<body
+    data-pdf-url="{{ url_for('static', filename='uploads/' + pdf_file) }}"
+    data-book-name="{{ book_name | urlencode }}"
+    data-page-range="{{ page_range }}">
+<h1>📄 PDF 캡처</h1>
+<div id="instruction">⚠️ PDF가 완전히 로드될 때까지 기다리세요!</div>
+<div id="thumbnails"></div>
+<div id="mainCanvasContainer">
+    <canvas id="pdfCanvas"></canvas>
+    <div id="selection"></div>
+</div>
+
+<form id="saveForm" action="/save_capture" method="post" onsubmit="return false;">
+    <input type="hidden" name="problem_img" id="problemImg">
+    <input type="hidden" name="choice_img" id="choiceImg">
+    <input type="hidden" name="explanation_img" id="explanationImg">
+    <div class="ui-section">
+        <div class="answer-options">
+            <strong>정답 선택:</strong>
+            <label><input type="radio" name="answer" value="1" required> 1번</label>
+            <label><input type="radio" name="answer" value="2"> 2번</label>
+            <label><input type="radio" name="answer" value="3"> 3번</label>
+            <label><input type="radio" name="answer" value="4"> 4번</label>
+            <label><input type="radio" name="answer" value="5"> 5번</label>
+        </div>
+        <div class="memo-section">
+            <label>📝 메모 (선택):</label>
+            <input type="text" name="memo" id="memo" placeholder="예: 1번 문제 - 세무사 기출">
+        </div>
+    </div>
+    <div class="buttons">
+        <button type="button" onclick="showFinalPreview()">💾 세트 저장</button>
+        <button type="button" onclick="window.location.href='/'">📥 PDF 업로드로 돌아가기</button>
+    </div>
+</form>
+
+<div id="finalPreviewModal">
+    <h3>📸 최종 미리보기</h3>
+    <div>
+        <h4>문제</h4><img id="finalProblemPreview" src="">
+        <h4>선지</h4><img id="finalChoicePreview" src="">
+        <h4>해설</h4><img id="finalExplanationPreview" src="">
+        <h4>정답: <span id="finalAnswerPreview"></span></h4>
+        <h4>메모: <span id="finalMemoPreview"></span></h4>
+    </div>
+    <button onclick="confirmFinalSave()">✅ 저장</button>
+    <button onclick="cancelFinalPreview()">❌ 다시 캡처</button>
+</div>
+
+<script src="{{ url_for('static', filename='scripts/viewer.js') }}"></script>
+</body>
+</html>

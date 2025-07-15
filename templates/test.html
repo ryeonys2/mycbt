@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ book_name }} - 시험</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 20px;
+            margin: 20px;
+            line-height: 1.6;
+        }
+        h1 {
+            font-size: 28px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        #progress {
+            font-size: 22px;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+  img {
+    display: block;
+    margin: 15px auto;
+    max-width: 90%;
+    /* border: 1px solid #ccc;  삭제 */
+    /* border-radius: 8px;      삭제 */
+}
+        #answers label {
+            display: block;
+            font-size: 22px;
+            margin: 10px 0;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+            cursor: pointer;
+        }
+        #answers input[type="radio"] {
+            transform: scale(1.5);
+            margin-right: 10px;
+        }
+        #result {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 22px;
+            font-weight: bold;
+        }
+        button {
+            display: inline-block;
+            margin: 15px;
+            padding: 12px 24px;
+            font-size: 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        button#checkBtn {
+            background-color: #4CAF50;
+            color: white;
+        }
+        button#nextBtn {
+            background-color: #2196F3;
+            color: white;
+        }
+    </style>
+    <script>
+        const bookName = "{{ book_name }}";
+        const questions = {{ questions | tojson }};
+        let current = 0;
+        let userAnswers = [];
+
+        function getImageUrl(path) {
+            return `/problem_sets/${path}`;
+        }
+
+        function showQuestion() {
+            const q = questions[current];
+            document.getElementById("problem").src = getImageUrl(q.problem);
+            document.getElementById("choice").src = getImageUrl(q.choice);
+            document.getElementById("progress").innerText = `문제 ${current + 1} / ${questions.length}`;
+            document.getElementById("answers").innerHTML = `
+                ${[1, 2, 3, 4, 5].map(n => `
+                    <label>
+                        <input type="radio" name="answer" value="${n}"> ${n}번
+                    </label>
+                `).join("")}
+            `;
+            document.getElementById("result").innerHTML = "";
+            document.getElementById("nextBtn").style.display = "none";
+        }
+
+        function checkAnswer() {
+            const selected = document.querySelector('input[name="answer"]:checked');
+            if (!selected) return alert("❌ 답을 선택하세요.");
+
+            const q = questions[current];
+            const userAnswer = selected.value;
+            const isCorrect = (userAnswer === q.answer);
+
+            document.getElementById("result").innerHTML = `
+                <h3>${isCorrect ? "✅ 정답!" : `❌ 오답 (정답: ${q.answer})`}</h3>
+                <img src="/problem_sets/${q.explanation}" style="width:70%;">
+            `;
+            document.getElementById("nextBtn").style.display = "inline";
+
+            userAnswers.push({
+                user_answer: userAnswer,
+                ...q
+            });
+        }
+
+        function nextQuestion() {
+            current++;
+            if (current < questions.length) {
+                showQuestion();
+            } else {
+                finishTest();
+            }
+        }
+
+        function finishTest() {
+            fetch("/test_result", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({questions: userAnswers})
+            }).then(res => res.text())
+              .then(html => document.body.innerHTML = html);
+        }
+
+        window.onload = showQuestion;
+    </script>
+</head>
+<body>
+    <h1>{{ book_name }}</h1>
+    <div id="progress"></div>
+    <img id="problem"><br>
+    <img id="choice"><br>
+    <div id="answers"></div>
+    <div id="result"></div>
+    <button id="checkBtn" onclick="checkAnswer()">✅ 정답 확인</button>
+    <button id="nextBtn" onclick="nextQuestion()" style="display:none;">➡️ 다음 문제</button>
+</body>
+</html>

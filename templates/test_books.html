@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>문제집 선택</title>
+</head>
+<body>
+    <h1>📚 문제집 선택</h1>
+    <ul>
+        {% for book in books %}
+            <li>
+                <a href="/test/{{ book }}">{{ book }}</a>
+            </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>PDF 갤러리</title>
+</head>
+<body>
+    <h1>📚 업로드된 PDF 목록</h1>
+    <ul>
+        {% for pdf in pdf_files %}
+            <li>{{ pdf }}</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

@@ -1,0 +1,48 @@
+<h1>📥 PDF 업로드 & 문제집 선택</h1>
+<form method="post" enctype="multipart/form-data">
+    <label>📕 문제집 선택:</label>
+    <select name="book_name" id="bookSelect" required>
+        {% for book in book_list %}
+            <option value="{{ book }}">{{ book }}</option>
+        {% endfor %}
+    </select>
+    <button type="button" onclick="createNewBook()">➕ 새 문제집 생성</button><br><br>
+
+    <label>📄 PDF 파일:</label>
+    <input type="file" name="pdf" accept="application/pdf" required><br><br>
+
+    <label>📑 페이지 범위 (예: 4-6,9):</label>
+    <input type="text" name="page_range" placeholder="전체 페이지는 비워두세요"><br><br>
+
+    <button type="submit">업로드</button>
+</form>
+
+<script>
+function createNewBook() {
+    const bookName = prompt("새 문제집 이름을 입력하세요:");
+    if (!bookName) return;
+
+    fetch(`/create_book?name=${encodeURIComponent(bookName)}`)
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                alert(`📕 '${bookName}' 문제집이 생성되었습니다.`);
+
+                // 문제집 목록에 새로 추가
+                const select = document.getElementById("bookSelect");
+                const option = document.createElement("option");
+                option.value = bookName;
+                option.textContent = bookName;
+                select.appendChild(option);
+
+                // 새로 생성한 문제집을 자동 선택
+                select.value = bookName;
+            } else {
+                alert(`❌ ${data.message}`);
+            }
+        })
+        .catch(err => {
+            alert(`❌ 서버 오류: ${err}`);
+        });
+}
+</script>
